@@ -376,7 +376,7 @@
       border-radius: 20px;
       padding: 1rem 1.2rem;
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       gap: 1.2rem;
       border: 1px solid #eef3fc;
       transition: 0.15s;
@@ -427,13 +427,10 @@
       font-size: 0.85rem;
       color: #5a6f8a;
       margin: 4px 0 6px 0;
-      line-height: 1.4;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-height: 2.8em;
+      line-height: 1.5;
+      /* Убрано обрезание — теперь описание полностью видно */
+      word-wrap: break-word;
+      overflow-wrap: break-word;
     }
 
     .game-meta {
@@ -476,6 +473,7 @@
       gap: 4px;
       align-self: flex-start;
       margin-top: 4px;
+      flex-shrink: 0;
     }
 
     .edit-btn,
@@ -602,7 +600,7 @@
     .modal .field textarea {
       resize: vertical;
       min-height: 60px;
-      max-height: 150px;
+      max-height: 200px;
     }
 
     .modal .field input:focus,
@@ -749,10 +747,6 @@
       .drop-zone {
         min-height: 44px;
         padding: 0.5rem 0.8rem;
-      }
-      .game-description {
-        -webkit-line-clamp: 3;
-        max-height: 4.2em;
       }
       .backup-controls {
         flex-direction: column;
@@ -1525,13 +1519,6 @@
       }
       if (e.key === 'Escape' && !addForm.classList.contains('hidden')) {
         toggleForm(false);
-      }
-      if (e.key === 'Enter' && modal.classList.contains('active')) {
-        const active = document.activeElement;
-        if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.tagName === 'SELECT')) {
-          e.preventDefault();
-          saveEditModal();
-        }
       }
     });
 
