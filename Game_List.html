@@ -1,0 +1,1568 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎮 Игровой список</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    body {
+      background: #f4f6fa;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1.5rem;
+    }
+
+    .app {
+      max-width: 800px;
+      width: 100%;
+      background: white;
+      border-radius: 32px;
+      padding: 2rem 2rem 2.5rem;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.06), 0 8px 24px rgba(0, 0, 0, 0.04);
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      font-weight: 600;
+      letter-spacing: -0.3px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #0b1b2f;
+      margin-bottom: 1.5rem;
+    }
+
+    h1 i {
+      color: #4f7df3;
+      font-size: 1.7rem;
+    }
+
+    /* ——— Кнопки управления ——— */
+    .backup-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      margin-bottom: 1.5rem;
+      padding: 0.8rem 1rem;
+      background: #f8faff;
+      border-radius: 16px;
+      border: 1px solid #edf2f9;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .backup-btn {
+      background: white;
+      border: 1px solid #dbe1ec;
+      color: #2b405c;
+      font-size: 0.8rem;
+      font-weight: 500;
+      padding: 0.5rem 1rem;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .backup-btn i {
+      font-size: 0.9rem;
+      color: #4f7df3;
+    }
+
+    .backup-btn:hover {
+      background: #4f7df3;
+      border-color: #4f7df3;
+      color: white;
+    }
+
+    .backup-btn:hover i {
+      color: white;
+    }
+
+    .backup-btn.danger:hover {
+      background: #e35f5f;
+      border-color: #e35f5f;
+    }
+
+    .backup-btn.primary {
+      background: #4f7df3;
+      border-color: #4f7df3;
+      color: white;
+    }
+
+    .backup-btn.primary i {
+      color: white;
+    }
+
+    .backup-btn.primary:hover {
+      background: #3b66db;
+      transform: scale(0.98);
+    }
+
+    .backup-btn input[type="file"] {
+      display: none;
+    }
+
+    .backup-btn .btn-label {
+      display: inline;
+    }
+
+    /* ——— Форма добавления (скрываемая) ——— */
+    .add-form-wrapper {
+      margin-bottom: 1.5rem;
+    }
+
+    .add-form {
+      background: #f8faff;
+      padding: 1.5rem 1.5rem 1.8rem;
+      border-radius: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      border: 1px solid #edf2f9;
+      margin-top: 1rem;
+    }
+
+    .add-form.hidden {
+      display: none;
+    }
+
+    .form-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .form-row .field {
+      flex: 1 1 160px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .field label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      color: #4b5b73;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .field label i {
+      font-size: 0.8rem;
+      width: 16px;
+      color: #4f7df3;
+    }
+
+    .field input,
+    .field select,
+    .field textarea {
+      background: white;
+      border: 1px solid #dbe1ec;
+      border-radius: 16px;
+      padding: 0.65rem 1rem;
+      font-size: 0.95rem;
+      outline: none;
+      transition: 0.2s;
+      width: 100%;
+      color: #0b1b2f;
+      font-family: inherit;
+    }
+
+    .field textarea {
+      resize: vertical;
+      min-height: 60px;
+      max-height: 150px;
+    }
+
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+      border-color: #4f7df3;
+      box-shadow: 0 0 0 4px rgba(79, 125, 243, 0.12);
+    }
+
+    .field input::placeholder,
+    .field textarea::placeholder {
+      color: #a5b6cd;
+      font-weight: 400;
+    }
+
+    /* ——— Зона загрузки картинки ——— */
+    .drop-zone {
+      background: white;
+      border: 2px dashed #dbe1ec;
+      border-radius: 16px;
+      padding: 0.65rem 1rem;
+      min-height: 52px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: 0.2s;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .drop-zone:hover {
+      border-color: #4f7df3;
+      background: #fafcff;
+    }
+
+    .drop-zone.dragover {
+      border-color: #4f7df3;
+      background: #eef4ff;
+      border-style: solid;
+    }
+
+    .drop-zone .preview-img {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      object-fit: cover;
+      flex-shrink: 0;
+      background: #eef3fc;
+    }
+
+    .drop-zone .placeholder {
+      color: #a5b6cd;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+    }
+
+    .drop-zone .placeholder i {
+      font-size: 1.2rem;
+      color: #bcc9df;
+    }
+
+    .drop-zone .remove-image {
+      background: none;
+      border: none;
+      color: #bcc9df;
+      cursor: pointer;
+      font-size: 1.1rem;
+      padding: 4px 8px;
+      border-radius: 20px;
+      transition: 0.15s;
+    }
+
+    .drop-zone .remove-image:hover {
+      color: #e35f5f;
+      background: rgba(227, 95, 95, 0.08);
+    }
+
+    .drop-zone input[type="file"] {
+      display: none;
+    }
+
+    .add-btn {
+      background: #4f7df3;
+      border: none;
+      color: white;
+      font-weight: 600;
+      font-size: 1rem;
+      padding: 0.7rem 1.8rem;
+      border-radius: 40px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: 0.15s;
+      box-shadow: 0 4px 12px rgba(79, 125, 243, 0.25);
+      margin-top: 6px;
+      align-self: flex-start;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .add-btn:hover {
+      background: #3b66db;
+      transform: scale(0.98);
+      box-shadow: 0 6px 16px rgba(79, 125, 243, 0.3);
+    }
+
+    .add-btn i {
+      font-size: 0.9rem;
+    }
+
+    .add-btn.cancel-btn {
+      background: #e8ecf1;
+      color: #4b5b73;
+      box-shadow: none;
+    }
+
+    .add-btn.cancel-btn:hover {
+      background: #d5dae3;
+      transform: scale(0.98);
+    }
+
+    /* ——— Сортировка над списком ——— */
+    .sort-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      padding: 0.6rem 1rem;
+      background: #f8faff;
+      border-radius: 16px;
+      border: 1px solid #edf2f9;
+      margin-bottom: 1.2rem;
+      flex-wrap: wrap;
+    }
+
+    .sort-bar .sort-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      color: #4b5b73;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .sort-bar .sort-label i {
+      color: #4f7df3;
+    }
+
+    .sort-bar select {
+      background: white;
+      border: 1px solid #dbe1ec;
+      border-radius: 20px;
+      padding: 0.4rem 0.8rem;
+      font-size: 0.8rem;
+      outline: none;
+      cursor: pointer;
+      color: #0b1b2f;
+      flex: 1;
+      max-width: 240px;
+    }
+
+    .sort-bar select:focus {
+      border-color: #4f7df3;
+      box-shadow: 0 0 0 3px rgba(79, 125, 243, 0.12);
+    }
+
+    .sort-bar .games-count {
+      font-size: 0.75rem;
+      color: #a5b6cd;
+      margin-left: auto;
+    }
+
+    /* ——— Список игр ——— */
+    .game-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+    }
+
+    .game-item {
+      background: white;
+      border-radius: 20px;
+      padding: 1rem 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      border: 1px solid #eef3fc;
+      transition: 0.15s;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+    }
+
+    .game-item:hover {
+      border-color: #d2def5;
+      background: #fafcff;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.02);
+    }
+
+    .game-cover {
+      width: 220px;
+      height: 120px;
+      border-radius: 16px;
+      background: #eef3fc;
+      flex-shrink: 0;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      color: #9eb1cc;
+      border: 1px solid #e0e9f5;
+    }
+
+    .game-cover img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .game-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .game-title {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: #0a1a2b;
+      letter-spacing: -0.2px;
+      margin-bottom: 2px;
+    }
+
+    .game-description {
+      font-size: 0.85rem;
+      color: #5a6f8a;
+      margin: 4px 0 6px 0;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-height: 2.8em;
+    }
+
+    .game-meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.6rem 1rem;
+      margin-top: 4px;
+      font-size: 0.85rem;
+    }
+
+    .game-rating {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      font-weight: 500;
+    }
+
+    .game-platform {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: #edf2fa;
+      padding: 0.2rem 0.7rem;
+      border-radius: 40px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: #2b405c;
+      letter-spacing: 0.2px;
+    }
+
+    .game-platform i {
+      font-size: 0.8rem;
+      color: #4f7df3;
+    }
+
+    .action-btns {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      align-self: flex-start;
+      margin-top: 4px;
+    }
+
+    .edit-btn,
+    .delete-btn {
+      background: none;
+      border: none;
+      color: #bcc9df;
+      font-size: 1.1rem;
+      cursor: pointer;
+      padding: 0.2rem 0.4rem;
+      transition: 0.1s;
+      border-radius: 30px;
+      text-align: center;
+      width: 32px;
+    }
+
+    .edit-btn:hover {
+      color: #4f7df3;
+      background: rgba(79, 125, 243, 0.08);
+    }
+
+    .delete-btn:hover {
+      color: #e35f5f;
+      background: rgba(227, 95, 95, 0.05);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 2.5rem 0 1.2rem;
+      color: #8fa2be;
+      font-weight: 400;
+      font-size: 0.95rem;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .empty-state i {
+      font-size: 2.6rem;
+      color: #d2def0;
+      margin-bottom: 6px;
+    }
+
+    /* ——— Модальное окно ——— */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      padding: 1.5rem;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal {
+      background: white;
+      border-radius: 32px;
+      padding: 2rem;
+      max-width: 600px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal h2 {
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: #0b1b2f;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .modal h2 i {
+      color: #4f7df3;
+    }
+
+    .modal .field {
+      margin-bottom: 1rem;
+    }
+
+    .modal .field label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      color: #4b5b73;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-bottom: 4px;
+    }
+
+    .modal .field label i {
+      color: #4f7df3;
+    }
+
+    .modal .field input,
+    .modal .field select,
+    .modal .field textarea {
+      background: white;
+      border: 1px solid #dbe1ec;
+      border-radius: 16px;
+      padding: 0.65rem 1rem;
+      font-size: 0.95rem;
+      outline: none;
+      transition: 0.2s;
+      width: 100%;
+      color: #0b1b2f;
+      font-family: inherit;
+    }
+
+    .modal .field textarea {
+      resize: vertical;
+      min-height: 60px;
+      max-height: 150px;
+    }
+
+    .modal .field input:focus,
+    .modal .field select:focus,
+    .modal .field textarea:focus {
+      border-color: #4f7df3;
+      box-shadow: 0 0 0 4px rgba(79, 125, 243, 0.12);
+    }
+
+    .modal .modal-actions {
+      display: flex;
+      gap: 0.8rem;
+      margin-top: 1.5rem;
+      justify-content: flex-end;
+    }
+
+    .modal .modal-actions button {
+      padding: 0.6rem 1.8rem;
+      border-radius: 40px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      border: none;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+
+    .modal .modal-actions .save-btn {
+      background: #4f7df3;
+      color: white;
+      box-shadow: 0 4px 12px rgba(79, 125, 243, 0.25);
+    }
+
+    .modal .modal-actions .save-btn:hover {
+      background: #3b66db;
+      transform: scale(0.98);
+    }
+
+    .modal .modal-actions .cancel-btn {
+      background: #f0f2f5;
+      color: #4b5b73;
+    }
+
+    .modal .modal-actions .cancel-btn:hover {
+      background: #e5e8ec;
+    }
+
+    .modal .drop-zone-modal {
+      background: white;
+      border: 2px dashed #dbe1ec;
+      border-radius: 16px;
+      padding: 0.65rem 1rem;
+      min-height: 52px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: 0.2s;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .modal .drop-zone-modal:hover {
+      border-color: #4f7df3;
+      background: #fafcff;
+    }
+
+    .modal .drop-zone-modal.dragover {
+      border-color: #4f7df3;
+      background: #eef4ff;
+      border-style: solid;
+    }
+
+    .modal .drop-zone-modal .preview-img-modal {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      object-fit: cover;
+      flex-shrink: 0;
+      background: #eef3fc;
+    }
+
+    .modal .drop-zone-modal .placeholder-modal {
+      color: #a5b6cd;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+    }
+
+    .modal .drop-zone-modal .placeholder-modal i {
+      font-size: 1.2rem;
+      color: #bcc9df;
+    }
+
+    .modal .drop-zone-modal .remove-image-modal {
+      background: none;
+      border: none;
+      color: #bcc9df;
+      cursor: pointer;
+      font-size: 1.1rem;
+      padding: 4px 8px;
+      border-radius: 20px;
+      transition: 0.15s;
+    }
+
+    .modal .drop-zone-modal .remove-image-modal:hover {
+      color: #e35f5f;
+      background: rgba(227, 95, 95, 0.08);
+    }
+
+    .modal .drop-zone-modal input[type="file"] {
+      display: none;
+    }
+
+    @media (max-width: 650px) {
+      .game-cover {
+        width: 120px;
+        height: 80px;
+      }
+    }
+
+    @media (max-width: 550px) {
+      .app {
+        padding: 1.5rem 1.2rem;
+      }
+      .form-row .field {
+        flex: 1 1 100%;
+      }
+      .add-btn {
+        width: 100%;
+        justify-content: center;
+      }
+      .game-item {
+        flex-wrap: wrap;
+        padding: 0.9rem;
+      }
+      .game-cover {
+        width: 100%;
+        height: 160px;
+      }
+      .game-title {
+        font-size: 1rem;
+      }
+      .drop-zone {
+        min-height: 44px;
+        padding: 0.5rem 0.8rem;
+      }
+      .game-description {
+        -webkit-line-clamp: 3;
+        max-height: 4.2em;
+      }
+      .backup-controls {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .backup-controls > div {
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+      .sort-bar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .sort-bar select {
+        max-width: 100%;
+      }
+      .sort-bar .games-count {
+        margin-left: 0;
+        text-align: center;
+      }
+      .modal {
+        padding: 1.5rem;
+      }
+      .action-btns {
+        flex-direction: row;
+        align-self: center;
+        margin-top: 0;
+      }
+      .backup-btn .btn-label {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app">
+  <h1><i class="fas fa-gamepad"></i> Мои пройденные игры</h1>
+
+  <!-- Кнопки управления -->
+  <div class="backup-controls">
+    <!-- Левая группа -->
+    <div style="display:flex; gap:0.6rem; flex-wrap:wrap;">
+      <button class="backup-btn primary" id="toggleFormBtn">
+        <i class="fas fa-plus-circle"></i> <span class="btn-label">Добавить игру</span>
+      </button>
+    </div>
+
+    <!-- Правая группа -->
+    <div style="display:flex; gap:0.6rem; flex-wrap:wrap; align-items:center;">
+      <button class="backup-btn" id="exportBtn">
+        <i class="fas fa-download"></i> <span class="btn-label">Экспорт</span>
+      </button>
+      <label class="backup-btn" id="importLabel">
+        <i class="fas fa-upload"></i> <span class="btn-label">Импорт</span>
+        <input type="file" id="importInput" accept=".json" />
+      </label>
+      <button class="backup-btn danger" id="clearBtn">
+        <i class="fas fa-trash-alt"></i> <span class="btn-label">Очистить</span>
+      </button>
+      <span style="font-size:0.8rem; color:#4f7df3; display:flex; align-items:center; gap:4px;" title="Автосохранение">
+        <i class="fas fa-database"></i>
+      </span>
+    </div>
+  </div>
+
+  <!-- Форма добавления (скрыта по умолчанию) -->
+  <div class="add-form-wrapper">
+    <div class="add-form hidden" id="addForm">
+      <div class="form-row">
+        <div class="field" style="flex: 2 1 100%;">
+          <label><i class="fas fa-image"></i> Картинка (перетащите или вставьте)</label>
+          <div class="drop-zone" id="dropZone">
+            <img id="previewImage" class="preview-img" style="display:none;" alt="Предпросмотр" />
+            <div class="placeholder" id="placeholderText">
+              <i class="fas fa-cloud-upload-alt"></i>
+              <span>Нажмите или перетащите файл, или вставьте из буфера (Cmd+V)</span>
+            </div>
+            <button class="remove-image" id="removeImage" style="display:none;" title="Удалить картинку">
+              <i class="fas fa-times-circle"></i>
+            </button>
+            <input type="file" id="fileInput" accept="image/*" />
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="field" style="flex: 1 1 100%;">
+          <label><i class="fas fa-tag"></i> Название</label>
+          <input type="text" id="gameName" placeholder="The Last of Us" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="field" style="flex: 1 1 100%;">
+          <label><i class="fas fa-align-left"></i> Описание (необязательно)</label>
+          <textarea id="gameDescription" placeholder="Коротко о чём игра, ваши впечатления..."></textarea>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label><i class="fas fa-star"></i> Оценка</label>
+          <select id="gameRating">
+            <option value="⭐">★☆☆☆☆ (1)</option>
+            <option value="⭐⭐">★★☆☆☆ (2)</option>
+            <option value="⭐⭐⭐" selected>★★★☆☆ (3)</option>
+            <option value="⭐⭐⭐⭐">★★★★☆ (4)</option>
+            <option value="⭐⭐⭐⭐⭐">★★★★★ (5)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label><i class="fas fa-desktop"></i> Платформа</label>
+          <select id="gamePlatform">
+            <option value="PC">PC</option>
+            <option value="XBOX">XBOX</option>
+            <option value="PS">PS</option>
+            <option value="Nintendo">Nintendo</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <button class="add-btn" id="addGameBtn">
+          <i class="fas fa-plus-circle"></i> Добавить
+        </button>
+        <button class="add-btn cancel-btn" id="cancelFormBtn">
+          <i class="fas fa-times"></i> Отмена
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Сортировка над списком -->
+  <div class="sort-bar">
+    <span class="sort-label"><i class="fas fa-sort"></i> Сортировка</span>
+    <select id="sortSelect">
+      <option value="newest">🕐 По дате (новые)</option>
+      <option value="oldest">🕐 По дате (старые)</option>
+      <option value="rating-desc">⭐ По рейтингу (высшие)</option>
+      <option value="rating-asc">⭐ По рейтингу (низшие)</option>
+      <option value="name-asc">🔤 По названию (А-Я)</option>
+      <option value="name-desc">🔤 По названию (Я-А)</option>
+    </select>
+    <span class="games-count" id="gamesCount">0 игр</span>
+  </div>
+
+  <!-- Список -->
+  <div id="gameListContainer" class="game-list">
+    <div class="empty-state" id="emptyState">
+      <i class="fas fa-ghost"></i>
+      <span>Пока ни одной игры. Нажмите «Добавить игру» чтобы начать!</span>
+    </div>
+  </div>
+</div>
+
+<!-- Модальное окно -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <h2><i class="fas fa-pen"></i> Редактировать игру</h2>
+    <div class="field">
+      <label><i class="fas fa-image"></i> Картинка</label>
+      <div class="drop-zone-modal" id="modalDropZone">
+        <img id="modalPreview" class="preview-img-modal" style="display:none;" alt="Предпросмотр" />
+        <div class="placeholder-modal" id="modalPlaceholder">
+          <i class="fas fa-cloud-upload-alt"></i>
+          <span>Нажмите или перетащите файл, или вставьте из буфера</span>
+        </div>
+        <button class="remove-image-modal" id="modalRemoveImage" style="display:none;" title="Удалить картинку">
+          <i class="fas fa-times-circle"></i>
+        </button>
+        <input type="file" id="modalFileInput" accept="image/*" />
+      </div>
+    </div>
+    <div class="field">
+      <label><i class="fas fa-tag"></i> Название *</label>
+      <input type="text" id="modalGameName" placeholder="Название игры" />
+    </div>
+    <div class="field">
+      <label><i class="fas fa-align-left"></i> Описание</label>
+      <textarea id="modalGameDescription" placeholder="Описание игры..."></textarea>
+    </div>
+    <div class="field">
+      <label><i class="fas fa-star"></i> Оценка</label>
+      <select id="modalGameRating">
+        <option value="⭐">★☆☆☆☆ (1)</option>
+        <option value="⭐⭐">★★☆☆☆ (2)</option>
+        <option value="⭐⭐⭐">★★★☆☆ (3)</option>
+        <option value="⭐⭐⭐⭐">★★★★☆ (4)</option>
+        <option value="⭐⭐⭐⭐⭐">★★★★★ (5)</option>
+      </select>
+    </div>
+    <div class="field">
+      <label><i class="fas fa-desktop"></i> Платформа</label>
+      <select id="modalGamePlatform">
+        <option value="PC">PC</option>
+        <option value="XBOX">XBOX</option>
+        <option value="PS">PS</option>
+        <option value="Nintendo">Nintendo</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="cancel-btn" id="modalCancelBtn">Отмена</button>
+      <button class="save-btn" id="modalSaveBtn">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    let games = [];
+    let currentImageData = null;
+    let editingGameId = null;
+    let modalImageData = null;
+
+    const STORAGE_KEY = 'gamesList';
+
+    const container = document.getElementById('gameListContainer');
+    const emptyState = document.getElementById('emptyState');
+    const addBtn = document.getElementById('addGameBtn');
+    const toggleFormBtn = document.getElementById('toggleFormBtn');
+    const cancelFormBtn = document.getElementById('cancelFormBtn');
+    const addForm = document.getElementById('addForm');
+    const nameInput = document.getElementById('gameName');
+    const descriptionInput = document.getElementById('gameDescription');
+    const ratingSelect = document.getElementById('gameRating');
+    const platformSelect = document.getElementById('gamePlatform');
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const previewImage = document.getElementById('previewImage');
+    const placeholderText = document.getElementById('placeholderText');
+    const removeImageBtn = document.getElementById('removeImage');
+
+    const exportBtn = document.getElementById('exportBtn');
+    const importInput = document.getElementById('importInput');
+    const clearBtn = document.getElementById('clearBtn');
+    const sortSelect = document.getElementById('sortSelect');
+    const gamesCount = document.getElementById('gamesCount');
+
+    const modal = document.getElementById('editModal');
+    const modalName = document.getElementById('modalGameName');
+    const modalDescription = document.getElementById('modalGameDescription');
+    const modalRating = document.getElementById('modalGameRating');
+    const modalPlatform = document.getElementById('modalGamePlatform');
+    const modalPreview = document.getElementById('modalPreview');
+    const modalPlaceholder = document.getElementById('modalPlaceholder');
+    const modalRemoveImage = document.getElementById('modalRemoveImage');
+    const modalDropZone = document.getElementById('modalDropZone');
+    const modalFileInput = document.getElementById('modalFileInput');
+    const modalSaveBtn = document.getElementById('modalSaveBtn');
+    const modalCancelBtn = document.getElementById('modalCancelBtn');
+
+    // --- Toggle формы ---
+    function toggleForm(show) {
+      if (show === undefined) {
+        addForm.classList.toggle('hidden');
+      } else if (show) {
+        addForm.classList.remove('hidden');
+      } else {
+        addForm.classList.add('hidden');
+      }
+      // Обновляем текст кнопки
+      if (addForm.classList.contains('hidden')) {
+        toggleFormBtn.innerHTML = '<i class="fas fa-plus-circle"></i> <span class="btn-label">Добавить игру</span>';
+      } else {
+        toggleFormBtn.innerHTML = '<i class="fas fa-times"></i> <span class="btn-label">Закрыть форму</span>';
+        nameInput.focus();
+      }
+    }
+
+    toggleFormBtn.addEventListener('click', () => toggleForm());
+    cancelFormBtn.addEventListener('click', () => {
+      toggleForm(false);
+      // Очищаем форму
+      nameInput.value = '';
+      descriptionInput.value = '';
+      setImageData(null);
+      ratingSelect.value = '⭐⭐⭐';
+      platformSelect.value = 'PC';
+    });
+
+    // --- Функция для генерации звёзд ---
+    function getRatingStars(count) {
+      const maxStars = 5;
+      let html = '';
+      for (let i = 0; i < maxStars; i++) {
+        if (i < count) {
+          html += '<i class="fas fa-star" style="color: #4f7df3; font-size: 0.95rem;"></i>';
+        } else {
+          html += '<i class="far fa-star" style="color: #dbe1ec; font-size: 0.95rem;"></i>';
+        }
+      }
+      return html;
+    }
+
+    function saveGames() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(games));
+      } catch (e) {
+        console.warn('Не удалось сохранить игры:', e);
+      }
+    }
+
+    function loadGames() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            games = parsed;
+            renderGames();
+            return true;
+          }
+        }
+      } catch (e) {
+        console.warn('Ошибка загрузки из localStorage:', e);
+      }
+      return false;
+    }
+
+    function getSortedGames() {
+      const sortType = sortSelect.value;
+      const copy = [...games];
+
+      switch (sortType) {
+        case 'newest':
+          return copy.sort((a, b) => new Date(b.added) - new Date(a.added));
+        case 'oldest':
+          return copy.sort((a, b) => new Date(a.added) - new Date(b.added));
+        case 'rating-desc':
+          return copy.sort((a, b) => {
+            const ra = a.rating ? a.rating.length : 0;
+            const rb = b.rating ? b.rating.length : 0;
+            return rb - ra;
+          });
+        case 'rating-asc':
+          return copy.sort((a, b) => {
+            const ra = a.rating ? a.rating.length : 0;
+            const rb = b.rating ? b.rating.length : 0;
+            return ra - rb;
+          });
+        case 'name-asc':
+          return copy.sort((a, b) => a.name.localeCompare(b.name));
+        case 'name-desc':
+          return copy.sort((a, b) => b.name.localeCompare(a.name));
+        default:
+          return copy.reverse();
+      }
+    }
+
+    function setImageData(dataUrl) {
+      if (dataUrl) {
+        currentImageData = dataUrl;
+        previewImage.src = dataUrl;
+        previewImage.style.display = 'block';
+        placeholderText.style.display = 'none';
+        removeImageBtn.style.display = 'block';
+      } else {
+        currentImageData = null;
+        previewImage.style.display = 'none';
+        previewImage.src = '';
+        placeholderText.style.display = 'flex';
+        removeImageBtn.style.display = 'none';
+      }
+    }
+
+    function handleFile(file) {
+      if (!file || !file.type.startsWith('image/')) return;
+      const reader = new FileReader();
+      reader.onload = (e) => setImageData(e.target.result);
+      reader.readAsDataURL(file);
+    }
+
+    function setModalImageData(dataUrl) {
+      if (dataUrl) {
+        modalImageData = dataUrl;
+        modalPreview.src = dataUrl;
+        modalPreview.style.display = 'block';
+        modalPlaceholder.style.display = 'none';
+        modalRemoveImage.style.display = 'block';
+      } else {
+        modalImageData = null;
+        modalPreview.style.display = 'none';
+        modalPreview.src = '';
+        modalPlaceholder.style.display = 'flex';
+        modalRemoveImage.style.display = 'none';
+      }
+    }
+
+    function handleModalFile(file) {
+      if (!file || !file.type.startsWith('image/')) return;
+      const reader = new FileReader();
+      reader.onload = (e) => setModalImageData(e.target.result);
+      reader.readAsDataURL(file);
+    }
+
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('dragover');
+    });
+    dropZone.addEventListener('dragleave', () => {
+      dropZone.classList.remove('dragover');
+    });
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      const files = e.dataTransfer.files;
+      if (files.length > 0) handleFile(files[0]);
+    });
+
+    dropZone.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files.length > 0) handleFile(fileInput.files[0]);
+      fileInput.value = '';
+    });
+
+    document.addEventListener('paste', (e) => {
+      const items = e.clipboardData && e.clipboardData.items;
+      if (!items) return;
+      for (let item of items) {
+        if (item.type.startsWith('image/')) {
+          const file = item.getAsFile();
+          handleFile(file);
+          e.preventDefault();
+          break;
+        }
+      }
+    });
+
+    removeImageBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      setImageData(null);
+    });
+
+    modalDropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      modalDropZone.classList.add('dragover');
+    });
+    modalDropZone.addEventListener('dragleave', () => {
+      modalDropZone.classList.remove('dragover');
+    });
+    modalDropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      modalDropZone.classList.remove('dragover');
+      const files = e.dataTransfer.files;
+      if (files.length > 0) handleModalFile(files[0]);
+    });
+
+    modalDropZone.addEventListener('click', () => modalFileInput.click());
+    modalFileInput.addEventListener('change', () => {
+      if (modalFileInput.files.length > 0) handleModalFile(modalFileInput.files[0]);
+      modalFileInput.value = '';
+    });
+
+    document.addEventListener('paste', (e) => {
+      if (!modal.classList.contains('active')) return;
+      const items = e.clipboardData && e.clipboardData.items;
+      if (!items) return;
+      for (let item of items) {
+        if (item.type.startsWith('image/')) {
+          const file = item.getAsFile();
+          handleModalFile(file);
+          e.preventDefault();
+          break;
+        }
+      }
+    });
+
+    modalRemoveImage.addEventListener('click', (e) => {
+      e.stopPropagation();
+      setModalImageData(null);
+    });
+
+    function getPlatformIcon(platform) {
+      const map = {
+        'PC': 'fa-solid fa-desktop',
+        'XBOX': 'fa-brands fa-xbox',
+        'PS': 'fa-brands fa-playstation',
+        'Nintendo': 'fa-brands fa-nintendo-switch'
+      };
+      return map[platform] || 'fa-solid fa-gamepad';
+    }
+
+    function renderGames() {
+      const items = container.querySelectorAll('.game-item');
+      items.forEach(el => el.remove());
+
+      if (games.length === 0) {
+        emptyState.style.display = 'flex';
+        gamesCount.textContent = '0 игр';
+        return;
+      }
+      emptyState.style.display = 'none';
+
+      const count = games.length;
+      let word = 'игр';
+      if (count === 1) word = 'игра';
+      else if (count >= 2 && count <= 4) word = 'игры';
+      gamesCount.textContent = `${count} ${word}`;
+
+      const sorted = getSortedGames();
+
+      sorted.forEach((game) => {
+        const item = document.createElement('div');
+        item.className = 'game-item';
+
+        const coverDiv = document.createElement('div');
+        coverDiv.className = 'game-cover';
+        if (game.image && game.image.startsWith('data:image')) {
+          const img = document.createElement('img');
+          img.src = game.image;
+          img.alt = game.name || 'Обложка';
+          coverDiv.appendChild(img);
+        } else {
+          const icon = document.createElement('i');
+          icon.className = 'fas fa-gamepad';
+          coverDiv.appendChild(icon);
+        }
+        item.appendChild(coverDiv);
+
+        const infoDiv = document.createElement('div');
+        infoDiv.className = 'game-info';
+
+        const titleSpan = document.createElement('div');
+        titleSpan.className = 'game-title';
+        titleSpan.textContent = game.name || 'Без названия';
+        infoDiv.appendChild(titleSpan);
+
+        if (game.description && game.description.trim() !== '') {
+          const descSpan = document.createElement('div');
+          descSpan.className = 'game-description';
+          descSpan.textContent = game.description;
+          infoDiv.appendChild(descSpan);
+        }
+
+        const metaDiv = document.createElement('div');
+        metaDiv.className = 'game-meta';
+
+        const ratingSpan = document.createElement('span');
+        ratingSpan.className = 'game-rating';
+        const ratingCount = game.rating ? game.rating.length : 3;
+        ratingSpan.innerHTML = getRatingStars(ratingCount);
+        metaDiv.appendChild(ratingSpan);
+
+        const platformSpan = document.createElement('span');
+        platformSpan.className = 'game-platform';
+        const platformIcon = document.createElement('i');
+        platformIcon.className = getPlatformIcon(game.platform);
+        platformSpan.appendChild(platformIcon);
+        platformSpan.appendChild(document.createTextNode(' ' + (game.platform || 'PC')));
+        metaDiv.appendChild(platformSpan);
+
+        infoDiv.appendChild(metaDiv);
+        item.appendChild(infoDiv);
+
+        const actionDiv = document.createElement('div');
+        actionDiv.className = 'action-btns';
+
+        const editBtn = document.createElement('button');
+        editBtn.className = 'edit-btn';
+        editBtn.innerHTML = '<i class="fas fa-pen"></i>';
+        editBtn.title = 'Редактировать';
+        editBtn.addEventListener('click', () => openEditModal(game.id));
+        actionDiv.appendChild(editBtn);
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'delete-btn';
+        deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
+        deleteBtn.title = 'Удалить';
+        deleteBtn.dataset.gameId = game.id;
+        deleteBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          const id = Number(this.dataset.gameId);
+          const idx = games.findIndex(g => g.id === id);
+          if (idx !== -1) {
+            if (confirm(`Удалить игру "${games[idx].name}"?`)) {
+              games.splice(idx, 1);
+              saveGames();
+              renderGames();
+            }
+          }
+        });
+        actionDiv.appendChild(deleteBtn);
+
+        item.appendChild(actionDiv);
+        container.appendChild(item);
+      });
+    }
+
+    function openEditModal(gameId) {
+      const game = games.find(g => g.id === gameId);
+      if (!game) return;
+
+      editingGameId = gameId;
+      modalName.value = game.name || '';
+      modalDescription.value = game.description || '';
+      modalRating.value = game.rating || '⭐⭐⭐';
+      modalPlatform.value = game.platform || 'PC';
+
+      if (game.image && game.image.startsWith('data:image')) {
+        setModalImageData(game.image);
+      } else {
+        setModalImageData(null);
+      }
+
+      modal.classList.add('active');
+      modalName.focus();
+    }
+
+    function closeEditModal() {
+      modal.classList.remove('active');
+      editingGameId = null;
+      setModalImageData(null);
+    }
+
+    function saveEditModal() {
+      const name = modalName.value.trim();
+      if (!name) {
+        alert('Пожалуйста, введите название игры.');
+        return;
+      }
+
+      const idx = games.findIndex(g => g.id === editingGameId);
+      if (idx === -1) return;
+
+      games[idx].name = name;
+      games[idx].description = modalDescription.value.trim();
+      games[idx].rating = modalRating.value;
+      games[idx].platform = modalPlatform.value;
+      if (modalImageData !== null) {
+        games[idx].image = modalImageData;
+      }
+
+      saveGames();
+      renderGames();
+      closeEditModal();
+    }
+
+    function addGame() {
+      const name = nameInput.value.trim();
+      if (!name) {
+        alert('Пожалуйста, введите название игры.');
+        return;
+      }
+
+      const description = descriptionInput.value.trim();
+
+      const newGame = {
+        id: Date.now(),
+        image: currentImageData || '',
+        name: name,
+        description: description,
+        rating: ratingSelect.value,
+        platform: platformSelect.value,
+        added: new Date().toISOString()
+      };
+
+      games.push(newGame);
+      saveGames();
+      renderGames();
+
+      nameInput.value = '';
+      descriptionInput.value = '';
+      setImageData(null);
+      ratingSelect.value = '⭐⭐⭐';
+      platformSelect.value = 'PC';
+      nameInput.focus();
+      // Закрываем форму после добавления
+      toggleForm(false);
+    }
+
+    function exportGames() {
+      if (games.length === 0) {
+        alert('Список игр пуст. Нечего экспортировать.');
+        return;
+      }
+      const data = JSON.stringify(games, null, 2);
+      const blob = new Blob([data], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const date = new Date().toISOString().slice(0, 10);
+      a.download = `games_backup_${date}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function importGames(file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (!Array.isArray(imported)) {
+            throw new Error('Неверный формат: ожидается массив');
+          }
+          if (imported.length === 0) {
+            alert('Файл пуст. Ничего не импортировано.');
+            return;
+          }
+          const valid = imported.every(g => g.id && g.name);
+          if (!valid) {
+            throw new Error('Некорректные данные: у каждой игры должны быть id и name');
+          }
+          if (games.length > 0) {
+            const confirm = window.confirm(
+              `Текущий список содержит ${games.length} игр.\nИмпорт ЗАМЕНИТ все текущие данные.\nПродолжить?`
+            );
+            if (!confirm) return;
+          }
+          games = imported;
+          saveGames();
+          renderGames();
+          alert(`✅ Импортировано ${games.length} игр!`);
+        } catch (err) {
+          alert('❌ Ошибка импорта: ' + err.message);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function clearAll() {
+      if (games.length === 0) {
+        alert('Список уже пуст.');
+        return;
+      }
+      const confirm = window.confirm(
+        `⚠️ Вы уверены, что хотите удалить ВСЕ ${games.length} игр?\nЭто действие нельзя отменить!`
+      );
+      if (!confirm) return;
+      games = [];
+      saveGames();
+      renderGames();
+      alert('🗑️ Все игры удалены.');
+    }
+
+    function seedDemoGames() {
+      games = [
+        {
+          id: 1001,
+          image: 'https://upload.wikimedia.org/wikipedia/en/4/46/The_Last_of_Us_Part_II_cover.jpg',
+          name: 'The Last of Us Part II',
+          description: 'Эмоциональное завершение истории Элли и Эбби. Борьба за выживание, прощение и искупление.',
+          rating: '⭐⭐⭐⭐⭐',
+          platform: 'PS',
+          added: new Date().toISOString()
+        },
+        {
+          id: 1002,
+          image: '',
+          name: 'Disco Elysium',
+          description: 'Детективная RPG с уникальной механикой диалогов и внутренних голосов.',
+          rating: '⭐⭐⭐⭐',
+          platform: 'PC',
+          added: new Date().toISOString()
+        }
+      ];
+      saveGames();
+      renderGames();
+    }
+
+    function init() {
+      const hasSaved = loadGames();
+      if (!hasSaved) {
+        seedDemoGames();
+      }
+    }
+
+    addBtn.addEventListener('click', addGame);
+    document.querySelectorAll('.field input, .field select, .field textarea').forEach(el => {
+      el.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && this.tagName !== 'TEXTAREA') {
+          e.preventDefault();
+          addGame();
+        }
+      });
+    });
+
+    sortSelect.addEventListener('change', renderGames);
+
+    exportBtn.addEventListener('click', exportGames);
+    importInput.addEventListener('change', (e) => {
+      if (importInput.files.length > 0) {
+        importGames(importInput.files[0]);
+        importInput.value = '';
+      }
+    });
+    clearBtn.addEventListener('click', clearAll);
+
+    modalCancelBtn.addEventListener('click', closeEditModal);
+    modalSaveBtn.addEventListener('click', saveEditModal);
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeEditModal();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modal.classList.contains('active')) {
+        closeEditModal();
+      }
+      if (e.key === 'Escape' && !addForm.classList.contains('hidden')) {
+        toggleForm(false);
+      }
+      if (e.key === 'Enter' && modal.classList.contains('active')) {
+        const active = document.activeElement;
+        if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.tagName === 'SELECT')) {
+          e.preventDefault();
+          saveEditModal();
+        }
+      }
+    });
+
+    init();
+  })();
+</script>
+
+</body>
+</html>
