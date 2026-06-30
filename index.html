@@ -756,16 +756,6 @@
       justify-content: flex-end;
     }
 
-    .modal .modal-actions button {
-      padding: 0.6rem 1.8rem;
-      border-radius: 40px;
-      font-weight: 600;
-      font-size: 0.95rem;
-      border: none;
-      cursor: pointer;
-      transition: 0.15s;
-    }
-
     .modal .modal-actions .save-btn {
       background: #4f7df3;
       color: white;
@@ -854,6 +844,52 @@
       display: none;
     }
 
+    /* ——— Стили для печати ——— */
+    @media print {
+      body {
+        background: white;
+        padding: 0;
+        margin: 0;
+      }
+
+      .app {
+        box-shadow: none;
+        padding: 20px;
+        max-width: 100%;
+        border-radius: 0;
+      }
+
+      .backup-controls,
+      .add-form-wrapper,
+      .action-btns,
+      .empty-state,
+      #emptyState {
+        display: none !important;
+      }
+
+      .filter-bar,
+      .sort-bar {
+        display: flex !important;
+      }
+
+      .game-item {
+        break-inside: avoid;
+        page-break-inside: avoid;
+        border: 1px solid #eef3fc !important;
+        box-shadow: none !important;
+      }
+
+      .game-cover {
+        width: 150px !important;
+        height: 100px !important;
+      }
+
+      .game-item:hover {
+        background: white !important;
+        border-color: #eef3fc !important;
+      }
+    }
+
     @media (max-width: 650px) {
       .game-cover {
         width: 120px;
@@ -940,6 +976,9 @@
     </div>
 
     <div style="display:flex; gap:0.6rem; flex-wrap:wrap; align-items:center;">
+      <button class="backup-btn" id="exportPdfBtn">
+        <i class="fas fa-file-pdf"></i> <span class="btn-label">PDF</span>
+      </button>
       <button class="backup-btn" id="exportBtn">
         <i class="fas fa-download"></i> <span class="btn-label">Экспорт</span>
       </button>
@@ -1167,6 +1206,7 @@
     const placeholderText = document.getElementById('placeholderText');
     const removeImageBtn = document.getElementById('removeImage');
 
+    const exportPdfBtn = document.getElementById('exportPdfBtn');
     const exportBtn = document.getElementById('exportBtn');
     const importInput = document.getElementById('importInput');
     const clearBtn = document.getElementById('clearBtn');
@@ -1202,29 +1242,27 @@
     // --- Функция для парсинга времени ---
     function parseTimeString(timeStr) {
       if (!timeStr || timeStr.trim() === '') return 0;
-      
+
       const str = timeStr.toLowerCase().trim();
-      
-      // Пробуем извлечь часы
+
       const hoursMatch = str.match(/(\d+\.?\d*)\s*(?:ч|час|часа|часов|h|hr)/i);
       const minutesMatch = str.match(/(\d+)\s*(?:м|мин|минуты|минут|min)/i);
-      
+
       let hours = 0;
       let minutes = 0;
-      
+
       if (hoursMatch) {
         hours = parseFloat(hoursMatch[1]);
       }
       if (minutesMatch) {
         minutes = parseInt(minutesMatch[1]) / 60;
       }
-      
-      // Если ничего не найдено — пробуем просто число
+
       if (!hoursMatch && !minutesMatch) {
         const num = parseFloat(str);
         if (!isNaN(num)) return num;
       }
-      
+
       return hours + minutes;
     }
 
@@ -1578,7 +1616,6 @@
           infoDiv.appendChild(descSpan);
         }
 
-        // --- Время в игре (между описанием и рейтингом) ---
         const timeSpan = document.createElement('div');
         timeSpan.className = 'game-time';
         const timeValue = game.time && game.time.trim() !== '' ? game.time : 'неизвестно';
@@ -1737,6 +1774,52 @@
       toggleForm(false);
     }
 
+    // --- Экспорт в PDF через печать ---
+    function exportToPDF() {
+      if (games.length === 0) {
+        alert('Список игр пуст! Нечего экспортировать.');
+        return;
+      }
+
+      // Сохраняем текущий заголовок страницы
+      const originalTitle = document.title;
+      document.title = 'Мои пройденные игры';
+
+      // Добавляем класс для печати
+      document.body.classList.add('printing');
+
+      // Показываем индикатор загрузки
+      const loading = document.createElement('div');
+      loading.style.cssText = `
+        position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(255,255,255,0.9); z-index: 9999;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 18px; color: #4f7df3; flex-direction: column; gap: 16px;
+      `;
+      loading.innerHTML = `
+        <div style="font-size: 40px;">🖨️</div>
+        <div>Подготовка PDF...</div>
+        <div style="font-size: 14px; color: #a5b6cd;">Откроется окно печати. Выберите «Сохранить как PDF».</div>
+      `;
+      document.body.appendChild(loading);
+
+      // Небольшая задержка для отображения индикатора
+      setTimeout(() => {
+        // Удаляем индикатор
+        document.body.removeChild(loading);
+
+        // Открываем диалог печати
+        window.print();
+
+        // Восстанавливаем заголовок
+        setTimeout(() => {
+          document.title = originalTitle;
+          document.body.classList.remove('printing');
+        }, 500);
+      }, 500);
+    }
+
+    // --- Экспорт ---
     function exportGames() {
       if (games.length === 0) {
         alert('Список игр пуст. Нечего экспортировать.');
@@ -1755,6 +1838,7 @@
       URL.revokeObjectURL(url);
     }
 
+    // --- Импорт ---
     function importGames(file) {
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -1788,6 +1872,7 @@
       reader.readAsText(file);
     }
 
+    // --- Очистка ---
     function clearAll() {
       if (games.length === 0) {
         alert('Список уже пуст.');
@@ -1864,6 +1949,7 @@
 
     sortSelect.addEventListener('change', renderGames);
 
+    exportPdfBtn.addEventListener('click', exportToPDF);
     exportBtn.addEventListener('click', exportGames);
     importInput.addEventListener('change', (e) => {
       if (importInput.files.length > 0) {
