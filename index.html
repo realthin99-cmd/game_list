@@ -1888,46 +1888,6 @@
       alert('🗑️ Все игры удалены.');
     }
 
-    function seedDemoGames() {
-      games = [
-        {
-          id: 1001,
-          image: 'https://upload.wikimedia.org/wikipedia/en/4/46/The_Last_of_Us_Part_II_cover.jpg',
-          name: 'The Last of Us Part II',
-          description: 'Эмоциональное завершение истории Элли и Эбби. Борьба за выживание, прощение и искупление.',
-          rating: '⭐⭐⭐⭐⭐',
-          platform: 'PS',
-          year: '2020',
-          time: '25 часов',
-          added: new Date().toISOString()
-        },
-        {
-          id: 1002,
-          image: '',
-          name: 'Disco Elysium',
-          description: 'Детективная RPG с уникальной механикой диалогов и внутренних голосов.',
-          rating: '⭐⭐⭐⭐',
-          platform: 'PC',
-          year: '2019',
-          time: '30 часов',
-          added: new Date().toISOString()
-        },
-        {
-          id: 1003,
-          image: '',
-          name: 'Hades',
-          description: 'Быстрая и динамичная roguelike-игра про побег из подземного мира.',
-          rating: '⭐⭐⭐⭐⭐',
-          platform: 'Nintendo',
-          year: '2021',
-          time: '15 часов 30 минут',
-          added: new Date().toISOString()
-        }
-      ];
-      saveGames();
-      renderGames();
-    }
-
     function init() {
       const hasSaved = loadGames();
       if (!hasSaved) {
