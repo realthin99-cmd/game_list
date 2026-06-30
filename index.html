@@ -452,7 +452,7 @@
       cursor: pointer;
       color: #0b1b2f;
       flex: 1;
-      max-width: 260px;
+      max-width: 290px;
     }
 
     .sort-bar select:focus {
@@ -528,11 +528,25 @@
     .game-description {
       font-size: 0.85rem;
       color: #5a6f8a;
-      margin: 4px 0 6px 0;
+      margin: 4px 0 12px 0;
       line-height: 1.5;
       word-wrap: break-word;
       overflow-wrap: break-word;
       white-space: pre-wrap;
+    }
+
+    .game-time {
+      font-size: 0.8rem;
+      color: #7a8fa8;
+      margin: 2px 0 4px 0;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .game-time i {
+      font-size: 0.7rem;
+      color: #a5b6cd;
     }
 
     .game-meta {
@@ -1022,6 +1036,10 @@
           <label><i class="far fa-calendar-alt"></i> Год <span class="optional">(прохождения)</span></label>
           <input type="number" id="gameYear" placeholder="2026" min="1980" max="2222" />
         </div>
+        <div class="field year-field" style="flex: 0 1 200px;">
+          <label><i class="fas fa-clock"></i> Время в игре <span class="optional">(необязательно)</span></label>
+          <input type="text" id="gameTime" placeholder="45 часов" />
+        </div>
       </div>
       <div class="form-row">
         <button class="add-btn" id="addGameBtn">
@@ -1042,6 +1060,8 @@
       <option value="oldest">🕐 По дате добавления (старые)</option>
       <option value="year-desc">📅 По году прохождения (новые)</option>
       <option value="year-asc">📅 По году прохождения (старые)</option>
+      <option value="time-desc">⏱️ По времени в игре (больше)</option>
+      <option value="time-asc">⏱️ По времени в игре (меньше)</option>
       <option value="rating-desc">⭐ По рейтингу (высшие)</option>
       <option value="rating-asc">⭐ По рейтингу (низшие)</option>
       <option value="name-asc">🔤 По названию (А-Я)</option>
@@ -1108,6 +1128,10 @@
       <label><i class="far fa-calendar-alt"></i> Год прохождения <span class="optional">(необязательно)</span></label>
       <input type="number" id="modalGameYear" placeholder="2024" min="1980" max="2030" />
     </div>
+    <div class="field">
+      <label><i class="fas fa-clock"></i> Время в игре <span class="optional">(необязательно)</span></label>
+      <input type="text" id="modalGameTime" placeholder="45 часов" />
+    </div>
     <div class="modal-actions">
       <button class="cancel-btn" id="modalCancelBtn">Отмена</button>
       <button class="save-btn" id="modalSaveBtn">Сохранить</button>
@@ -1136,6 +1160,7 @@
     const ratingSelect = document.getElementById('gameRating');
     const platformSelect = document.getElementById('gamePlatform');
     const yearInput = document.getElementById('gameYear');
+    const timeInput = document.getElementById('gameTime');
     const dropZone = document.getElementById('dropZone');
     const fileInput = document.getElementById('fileInput');
     const previewImage = document.getElementById('previewImage');
@@ -1165,6 +1190,7 @@
     const modalRating = document.getElementById('modalGameRating');
     const modalPlatform = document.getElementById('modalGamePlatform');
     const modalYear = document.getElementById('modalGameYear');
+    const modalTime = document.getElementById('modalGameTime');
     const modalPreview = document.getElementById('modalPreview');
     const modalPlaceholder = document.getElementById('modalPlaceholder');
     const modalRemoveImage = document.getElementById('modalRemoveImage');
@@ -1172,6 +1198,35 @@
     const modalFileInput = document.getElementById('modalFileInput');
     const modalSaveBtn = document.getElementById('modalSaveBtn');
     const modalCancelBtn = document.getElementById('modalCancelBtn');
+
+    // --- Функция для парсинга времени ---
+    function parseTimeString(timeStr) {
+      if (!timeStr || timeStr.trim() === '') return 0;
+      
+      const str = timeStr.toLowerCase().trim();
+      
+      // Пробуем извлечь часы
+      const hoursMatch = str.match(/(\d+\.?\d*)\s*(?:ч|час|часа|часов|h|hr)/i);
+      const minutesMatch = str.match(/(\d+)\s*(?:м|мин|минуты|минут|min)/i);
+      
+      let hours = 0;
+      let minutes = 0;
+      
+      if (hoursMatch) {
+        hours = parseFloat(hoursMatch[1]);
+      }
+      if (minutesMatch) {
+        minutes = parseInt(minutesMatch[1]) / 60;
+      }
+      
+      // Если ничего не найдено — пробуем просто число
+      if (!hoursMatch && !minutesMatch) {
+        const num = parseFloat(str);
+        if (!isNaN(num)) return num;
+      }
+      
+      return hours + minutes;
+    }
 
     // --- Toggle формы ---
     function toggleForm(show) {
@@ -1196,6 +1251,7 @@
       nameInput.value = '';
       descriptionInput.value = '';
       yearInput.value = '';
+      timeInput.value = '';
       setImageData(null);
       ratingSelect.value = '⭐⭐⭐';
       platformSelect.value = 'PC';
@@ -1266,6 +1322,18 @@
             const ya = a.year ? parseInt(a.year) : 0;
             const yb = b.year ? parseInt(b.year) : 0;
             return ya - yb;
+          });
+        case 'time-desc':
+          return copy.sort((a, b) => {
+            const ta = parseTimeString(a.time);
+            const tb = parseTimeString(b.time);
+            return tb - ta;
+          });
+        case 'time-asc':
+          return copy.sort((a, b) => {
+            const ta = parseTimeString(a.time);
+            const tb = parseTimeString(b.time);
+            return ta - tb;
           });
         case 'rating-desc':
           return copy.sort((a, b) => {
@@ -1443,7 +1511,7 @@
         'PC': 'fa-solid fa-desktop',
         'XBOX': 'fa-brands fa-xbox',
         'PS': 'fa-brands fa-playstation',
-        'Nintendo Switch': 'fa-regular fa-game-console-handheld'
+        'Nintendo': 'fa-solid fa-gamepad'
       };
       return map[platform] || 'fa-solid fa-gamepad';
     }
@@ -1509,6 +1577,13 @@
           descSpan.textContent = game.description;
           infoDiv.appendChild(descSpan);
         }
+
+        // --- Время в игре (между описанием и рейтингом) ---
+        const timeSpan = document.createElement('div');
+        timeSpan.className = 'game-time';
+        const timeValue = game.time && game.time.trim() !== '' ? game.time : 'неизвестно';
+        timeSpan.innerHTML = `<i class="fas fa-clock"></i> Время в игре: ${timeValue}`;
+        infoDiv.appendChild(timeSpan);
 
         const metaDiv = document.createElement('div');
         metaDiv.className = 'game-meta';
@@ -1581,6 +1656,7 @@
       modalRating.value = game.rating || '⭐⭐⭐';
       modalPlatform.value = game.platform || 'PC';
       modalYear.value = game.year || '';
+      modalTime.value = game.time || '';
 
       if (game.image && game.image.startsWith('data:image')) {
         setModalImageData(game.image);
@@ -1613,6 +1689,7 @@
       games[idx].rating = modalRating.value;
       games[idx].platform = modalPlatform.value;
       games[idx].year = modalYear.value.trim() || '';
+      games[idx].time = modalTime.value.trim() || '';
       if (modalImageData !== null) {
         games[idx].image = modalImageData;
       }
@@ -1631,6 +1708,7 @@
 
       const description = descriptionInput.value.trim();
       const year = yearInput.value.trim();
+      const time = timeInput.value.trim();
 
       const newGame = {
         id: Date.now(),
@@ -1640,6 +1718,7 @@
         rating: ratingSelect.value,
         platform: platformSelect.value,
         year: year,
+        time: time,
         added: new Date().toISOString()
       };
 
@@ -1650,6 +1729,7 @@
       nameInput.value = '';
       descriptionInput.value = '';
       yearInput.value = '';
+      timeInput.value = '';
       setImageData(null);
       ratingSelect.value = '⭐⭐⭐';
       platformSelect.value = 'PC';
@@ -1733,6 +1813,7 @@
           rating: '⭐⭐⭐⭐⭐',
           platform: 'PS',
           year: '2020',
+          time: '25 часов',
           added: new Date().toISOString()
         },
         {
@@ -1743,6 +1824,7 @@
           rating: '⭐⭐⭐⭐',
           platform: 'PC',
           year: '2019',
+          time: '30 часов',
           added: new Date().toISOString()
         },
         {
@@ -1753,6 +1835,7 @@
           rating: '⭐⭐⭐⭐⭐',
           platform: 'Nintendo',
           year: '2021',
+          time: '15 часов 30 минут',
           added: new Date().toISOString()
         }
       ];
