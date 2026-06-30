@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>🎮 Игровой список</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <style>
     * {
       margin: 0;
@@ -119,6 +119,97 @@
       display: inline;
     }
 
+    /* ——— Фильтры по платформам ——— */
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      padding: 0.6rem 1rem;
+      background: #f8faff;
+      border-radius: 16px;
+      border: 1px solid #edf2f9;
+      margin-bottom: 1.2rem;
+      align-items: center;
+    }
+
+    .filter-bar .filter-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      color: #4b5b73;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-right: 0.2rem;
+    }
+
+    .filter-bar .filter-label i {
+      color: #4f7df3;
+    }
+
+    .filter-btn {
+      background: white;
+      border: 1px solid #dbe1ec;
+      color: #2b405c;
+      font-size: 0.75rem;
+      font-weight: 500;
+      padding: 0.3rem 0.8rem;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .filter-btn:hover {
+      background: #eef4ff;
+      border-color: #4f7df3;
+    }
+
+    .filter-btn.active {
+      background: #4f7df3;
+      border-color: #4f7df3;
+      color: white;
+    }
+
+    .filter-btn.active i {
+      color: white;
+    }
+
+    .filter-btn i {
+      font-size: 0.8rem;
+      color: #4f7df3;
+    }
+
+    .filter-btn .filter-count {
+      background: #edf2fa;
+      color: #4b5b73;
+      font-size: 0.6rem;
+      padding: 0.1rem 0.4rem;
+      border-radius: 20px;
+      margin-left: 2px;
+    }
+
+    .filter-btn.active .filter-count {
+      background: rgba(255,255,255,0.25);
+      color: white;
+    }
+
+    .filter-btn.clear-filter {
+      color: #e35f5f;
+    }
+
+    .filter-btn.clear-filter i {
+      color: #e35f5f;
+    }
+
+    .filter-btn.clear-filter:hover {
+      background: #fee8e8;
+      border-color: #e35f5f;
+    }
+
     /* ——— Форма добавления (скрываемая) ——— */
     .add-form-wrapper {
       margin-bottom: 1.5rem;
@@ -152,6 +243,10 @@
       gap: 5px;
     }
 
+    .form-row .field.year-field {
+      flex: 0 1 140px;
+    }
+
     .field label {
       font-size: 0.75rem;
       font-weight: 600;
@@ -167,6 +262,13 @@
       font-size: 0.8rem;
       width: 16px;
       color: #4f7df3;
+    }
+
+    .field label .optional {
+      font-weight: 400;
+      text-transform: none;
+      font-size: 0.65rem;
+      color: #a5b6cd;
     }
 
     .field input,
@@ -350,7 +452,7 @@
       cursor: pointer;
       color: #0b1b2f;
       flex: 1;
-      max-width: 240px;
+      max-width: 260px;
     }
 
     .sort-bar select:focus {
@@ -467,6 +569,22 @@
       color: #4f7df3;
     }
 
+    .game-year {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.75rem;
+      color: #7a8fa8;
+      background: #f0f4fa;
+      padding: 0.15rem 0.6rem;
+      border-radius: 30px;
+    }
+
+    .game-year i {
+      font-size: 0.7rem;
+      color: #a5b6cd;
+    }
+
     .action-btns {
       display: flex;
       flex-direction: column;
@@ -580,6 +698,13 @@
 
     .modal .field label i {
       color: #4f7df3;
+    }
+
+    .modal .field label .optional {
+      font-weight: 400;
+      text-transform: none;
+      font-size: 0.65rem;
+      color: #a5b6cd;
     }
 
     .modal .field input,
@@ -729,6 +854,9 @@
       .form-row .field {
         flex: 1 1 100%;
       }
+      .form-row .field.year-field {
+        flex: 1 1 100%;
+      }
       .add-btn {
         width: 100%;
         justify-content: center;
@@ -755,6 +883,9 @@
       .backup-controls > div {
         justify-content: center;
         flex-wrap: wrap;
+      }
+      .filter-bar {
+        justify-content: center;
       }
       .sort-bar {
         flex-direction: column;
@@ -788,14 +919,12 @@
 
   <!-- Кнопки управления -->
   <div class="backup-controls">
-    <!-- Левая группа -->
     <div style="display:flex; gap:0.6rem; flex-wrap:wrap;">
       <button class="backup-btn primary" id="toggleFormBtn">
         <i class="fas fa-plus-circle"></i> <span class="btn-label">Добавить игру</span>
       </button>
     </div>
 
-    <!-- Правая группа -->
     <div style="display:flex; gap:0.6rem; flex-wrap:wrap; align-items:center;">
       <button class="backup-btn" id="exportBtn">
         <i class="fas fa-download"></i> <span class="btn-label">Экспорт</span>
@@ -811,6 +940,31 @@
         <i class="fas fa-database"></i>
       </span>
     </div>
+  </div>
+
+  <!-- Фильтры по платформам -->
+  <div class="filter-bar" id="filterBar">
+    <span class="filter-label"><i class="fas fa-filter"></i> Платформа</span>
+    <button class="filter-btn active" data-platform="all">
+      <i class="fas fa-th-list"></i> Все
+      <span class="filter-count" id="countAll">0</span>
+    </button>
+    <button class="filter-btn" data-platform="PC">
+      <i class="fas fa-desktop"></i> PC
+      <span class="filter-count" id="countPC">0</span>
+    </button>
+    <button class="filter-btn" data-platform="XBOX">
+      <i class="fab fa-xbox"></i> XBOX
+      <span class="filter-count" id="countXBOX">0</span>
+    </button>
+    <button class="filter-btn" data-platform="PS">
+      <i class="fab fa-playstation"></i> PS
+      <span class="filter-count" id="countPS">0</span>
+    </button>
+    <button class="filter-btn" data-platform="Nintendo">
+      <i class="fas fa-gamepad"></i> Nintendo
+      <span class="filter-count" id="countNintendo">0</span>
+    </button>
   </div>
 
   <!-- Форма добавления (скрыта по умолчанию) -->
@@ -861,8 +1015,12 @@
             <option value="PC">PC</option>
             <option value="XBOX">XBOX</option>
             <option value="PS">PS</option>
-            <option value="Nintendo Switch Lite">Nintendo</option>
+            <option value="Nintendo">Nintendo</option>
           </select>
+        </div>
+        <div class="field year-field">
+          <label><i class="far fa-calendar-alt"></i> Год <span class="optional">(прохождения)</span></label>
+          <input type="number" id="gameYear" placeholder="2026" min="1980" max="2222" />
         </div>
       </div>
       <div class="form-row">
@@ -880,8 +1038,10 @@
   <div class="sort-bar">
     <span class="sort-label"><i class="fas fa-sort"></i> Сортировка</span>
     <select id="sortSelect">
-      <option value="newest">🕐 По дате (новые)</option>
-      <option value="oldest">🕐 По дате (старые)</option>
+      <option value="newest">🕐 По дате добавления (новые)</option>
+      <option value="oldest">🕐 По дате добавления (старые)</option>
+      <option value="year-desc">📅 По году прохождения (новые)</option>
+      <option value="year-asc">📅 По году прохождения (старые)</option>
       <option value="rating-desc">⭐ По рейтингу (высшие)</option>
       <option value="rating-asc">⭐ По рейтингу (низшие)</option>
       <option value="name-asc">🔤 По названию (А-Я)</option>
@@ -941,8 +1101,12 @@
         <option value="PC">PC</option>
         <option value="XBOX">XBOX</option>
         <option value="PS">PS</option>
-        <option value="Nintendo Switch Lite">Nintendo</option>
+        <option value="Nintendo">Nintendo</option>
       </select>
+    </div>
+    <div class="field">
+      <label><i class="far fa-calendar-alt"></i> Год прохождения <span class="optional">(необязательно)</span></label>
+      <input type="number" id="modalGameYear" placeholder="2024" min="1980" max="2030" />
     </div>
     <div class="modal-actions">
       <button class="cancel-btn" id="modalCancelBtn">Отмена</button>
@@ -960,6 +1124,7 @@
 
     const STORAGE_KEY = 'gamesList';
 
+    // --- DOM элементы ---
     const container = document.getElementById('gameListContainer');
     const emptyState = document.getElementById('emptyState');
     const addBtn = document.getElementById('addGameBtn');
@@ -970,6 +1135,7 @@
     const descriptionInput = document.getElementById('gameDescription');
     const ratingSelect = document.getElementById('gameRating');
     const platformSelect = document.getElementById('gamePlatform');
+    const yearInput = document.getElementById('gameYear');
     const dropZone = document.getElementById('dropZone');
     const fileInput = document.getElementById('fileInput');
     const previewImage = document.getElementById('previewImage');
@@ -982,11 +1148,23 @@
     const sortSelect = document.getElementById('sortSelect');
     const gamesCount = document.getElementById('gamesCount');
 
+    // --- Фильтры ---
+    let currentFilter = 'all';
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const countElements = {
+      all: document.getElementById('countAll'),
+      PC: document.getElementById('countPC'),
+      XBOX: document.getElementById('countXBOX'),
+      PS: document.getElementById('countPS'),
+      Nintendo: document.getElementById('countNintendo')
+    };
+
     const modal = document.getElementById('editModal');
     const modalName = document.getElementById('modalGameName');
     const modalDescription = document.getElementById('modalGameDescription');
     const modalRating = document.getElementById('modalGameRating');
     const modalPlatform = document.getElementById('modalGamePlatform');
+    const modalYear = document.getElementById('modalGameYear');
     const modalPreview = document.getElementById('modalPreview');
     const modalPlaceholder = document.getElementById('modalPlaceholder');
     const modalRemoveImage = document.getElementById('modalRemoveImage');
@@ -1004,7 +1182,6 @@
       } else {
         addForm.classList.add('hidden');
       }
-      // Обновляем текст кнопки
       if (addForm.classList.contains('hidden')) {
         toggleFormBtn.innerHTML = '<i class="fas fa-plus-circle"></i> <span class="btn-label">Добавить игру</span>';
       } else {
@@ -1016,9 +1193,9 @@
     toggleFormBtn.addEventListener('click', () => toggleForm());
     cancelFormBtn.addEventListener('click', () => {
       toggleForm(false);
-      // Очищаем форму
       nameInput.value = '';
       descriptionInput.value = '';
+      yearInput.value = '';
       setImageData(null);
       ratingSelect.value = '⭐⭐⭐';
       platformSelect.value = 'PC';
@@ -1063,15 +1240,33 @@
       return false;
     }
 
+    function getFilteredGames() {
+      if (currentFilter === 'all') return games;
+      return games.filter(g => g.platform === currentFilter);
+    }
+
     function getSortedGames() {
       const sortType = sortSelect.value;
-      const copy = [...games];
+      const filtered = getFilteredGames();
+      const copy = [...filtered];
 
       switch (sortType) {
         case 'newest':
           return copy.sort((a, b) => new Date(b.added) - new Date(a.added));
         case 'oldest':
           return copy.sort((a, b) => new Date(a.added) - new Date(b.added));
+        case 'year-desc':
+          return copy.sort((a, b) => {
+            const ya = a.year ? parseInt(a.year) : 0;
+            const yb = b.year ? parseInt(b.year) : 0;
+            return yb - ya;
+          });
+        case 'year-asc':
+          return copy.sort((a, b) => {
+            const ya = a.year ? parseInt(a.year) : 0;
+            const yb = b.year ? parseInt(b.year) : 0;
+            return ya - yb;
+          });
         case 'rating-desc':
           return copy.sort((a, b) => {
             const ra = a.rating ? a.rating.length : 0;
@@ -1093,6 +1288,33 @@
       }
     }
 
+    // --- Обновление счётчиков фильтров ---
+    function updateFilterCounts() {
+      const platforms = ['all', 'PC', 'XBOX', 'PS', 'Nintendo'];
+      platforms.forEach(p => {
+        const count = p === 'all' ? games.length : games.filter(g => g.platform === p).length;
+        if (countElements[p]) {
+          countElements[p].textContent = count;
+        }
+      });
+    }
+
+    function setFilter(platform) {
+      currentFilter = platform;
+      filterBtns.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.platform === platform);
+      });
+      renderGames();
+    }
+
+    // --- Фильтры ---
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        setFilter(btn.dataset.platform);
+      });
+    });
+
+    // --- Работа с картинкой ---
     function setImageData(dataUrl) {
       if (dataUrl) {
         currentImageData = dataUrl;
@@ -1221,7 +1443,7 @@
         'PC': 'fa-solid fa-desktop',
         'XBOX': 'fa-brands fa-xbox',
         'PS': 'fa-brands fa-playstation',
-        'Nintendo': 'fa-brands fa-nintendo-switch'
+        'Nintendo Switch': 'fa-regular fa-game-console-handheld'
       };
       return map[platform] || 'fa-solid fa-gamepad';
     }
@@ -1230,18 +1452,28 @@
       const items = container.querySelectorAll('.game-item');
       items.forEach(el => el.remove());
 
-      if (games.length === 0) {
+      updateFilterCounts();
+
+      const filtered = getFilteredGames();
+
+      if (filtered.length === 0) {
         emptyState.style.display = 'flex';
-        gamesCount.textContent = '0 игр';
+        if (games.length === 0) {
+          emptyState.innerHTML = '<i class="fas fa-ghost"></i><span>Пока ни одной игры. Нажмите «Добавить игру» чтобы начать!</span>';
+        } else {
+          emptyState.innerHTML = '<i class="fas fa-search"></i><span>Нет игр на выбранной платформе</span>';
+        }
+        gamesCount.textContent = `${filtered.length} из ${games.length} игр`;
         return;
       }
       emptyState.style.display = 'none';
 
-      const count = games.length;
+      const count = filtered.length;
+      const total = games.length;
       let word = 'игр';
       if (count === 1) word = 'игра';
       else if (count >= 2 && count <= 4) word = 'игры';
-      gamesCount.textContent = `${count} ${word}`;
+      gamesCount.textContent = total === count ? `${count} ${word}` : `${count} из ${total} игр`;
 
       const sorted = getSortedGames();
 
@@ -1295,6 +1527,13 @@
         platformSpan.appendChild(document.createTextNode(' ' + (game.platform || 'PC')));
         metaDiv.appendChild(platformSpan);
 
+        if (game.year) {
+          const yearSpan = document.createElement('span');
+          yearSpan.className = 'game-year';
+          yearSpan.innerHTML = `<i class="far fa-calendar-alt"></i> ${game.year}`;
+          metaDiv.appendChild(yearSpan);
+        }
+
         infoDiv.appendChild(metaDiv);
         item.appendChild(infoDiv);
 
@@ -1341,6 +1580,7 @@
       modalDescription.value = game.description || '';
       modalRating.value = game.rating || '⭐⭐⭐';
       modalPlatform.value = game.platform || 'PC';
+      modalYear.value = game.year || '';
 
       if (game.image && game.image.startsWith('data:image')) {
         setModalImageData(game.image);
@@ -1372,6 +1612,7 @@
       games[idx].description = modalDescription.value.trim();
       games[idx].rating = modalRating.value;
       games[idx].platform = modalPlatform.value;
+      games[idx].year = modalYear.value.trim() || '';
       if (modalImageData !== null) {
         games[idx].image = modalImageData;
       }
@@ -1389,6 +1630,7 @@
       }
 
       const description = descriptionInput.value.trim();
+      const year = yearInput.value.trim();
 
       const newGame = {
         id: Date.now(),
@@ -1397,6 +1639,7 @@
         description: description,
         rating: ratingSelect.value,
         platform: platformSelect.value,
+        year: year,
         added: new Date().toISOString()
       };
 
@@ -1406,11 +1649,11 @@
 
       nameInput.value = '';
       descriptionInput.value = '';
+      yearInput.value = '';
       setImageData(null);
       ratingSelect.value = '⭐⭐⭐';
       platformSelect.value = 'PC';
       nameInput.focus();
-      // Закрываем форму после добавления
       toggleForm(false);
     }
 
@@ -1480,13 +1723,52 @@
       alert('🗑️ Все игры удалены.');
     }
 
+    function seedDemoGames() {
+      games = [
+        {
+          id: 1001,
+          image: 'https://upload.wikimedia.org/wikipedia/en/4/46/The_Last_of_Us_Part_II_cover.jpg',
+          name: 'The Last of Us Part II',
+          description: 'Эмоциональное завершение истории Элли и Эбби. Борьба за выживание, прощение и искупление.',
+          rating: '⭐⭐⭐⭐⭐',
+          platform: 'PS',
+          year: '2020',
+          added: new Date().toISOString()
+        },
+        {
+          id: 1002,
+          image: '',
+          name: 'Disco Elysium',
+          description: 'Детективная RPG с уникальной механикой диалогов и внутренних голосов.',
+          rating: '⭐⭐⭐⭐',
+          platform: 'PC',
+          year: '2019',
+          added: new Date().toISOString()
+        },
+        {
+          id: 1003,
+          image: '',
+          name: 'Hades',
+          description: 'Быстрая и динамичная roguelike-игра про побег из подземного мира.',
+          rating: '⭐⭐⭐⭐⭐',
+          platform: 'Nintendo',
+          year: '2021',
+          added: new Date().toISOString()
+        }
+      ];
+      saveGames();
+      renderGames();
+    }
+
     function init() {
       const hasSaved = loadGames();
       if (!hasSaved) {
         seedDemoGames();
       }
+      updateFilterCounts();
     }
 
+    // --- События ---
     addBtn.addEventListener('click', addGame);
     document.querySelectorAll('.field input, .field select, .field textarea').forEach(el => {
       el.addEventListener('keydown', function(e) {
