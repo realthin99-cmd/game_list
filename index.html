@@ -1239,6 +1239,43 @@
     const modalSaveBtn = document.getElementById('modalSaveBtn');
     const modalCancelBtn = document.getElementById('modalCancelBtn');
 
+    // --- Функция сжатия картинки ---
+    function compressImage(dataUrl, maxWidth = 300, maxHeight = 200, quality = 0.7) {
+      return new Promise((resolve) => {
+        if (!dataUrl || !dataUrl.startsWith('data:image')) {
+          resolve(dataUrl);
+          return;
+        }
+        
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          
+          // Масштабируем
+          if (width > maxWidth) {
+            height = height * (maxWidth / width);
+            width = maxWidth;
+          }
+          if (height > maxHeight) {
+            width = width * (maxHeight / height);
+            height = maxHeight;
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.onerror = function() {
+          resolve(dataUrl);
+        };
+        img.src = dataUrl;
+      });
+    }
+
     // --- Функция для парсинга времени ---
     function parseTimeString(timeStr) {
       if (!timeStr || timeStr.trim() === '') return 0;
@@ -1311,9 +1348,20 @@
 
     function saveGames() {
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(games));
+        const data = JSON.stringify(games);
+        // Проверяем размер данных
+        if (data.length > 4.5 * 1024 * 1024) {
+          console.warn('⚠️ Данные близки к лимиту localStorage (~4.5 МБ). Рекомендуется удалить старые игры или сжать картинки.');
+        }
+        localStorage.setItem(STORAGE_KEY, data);
+        return true;
       } catch (e) {
-        console.warn('Не удалось сохранить игры:', e);
+        if (e.name === 'QuotaExceededError') {
+          alert('⚠️ Достигнут лимит хранилища! Попробуйте удалить старые игры или использовать картинки меньшего размера.');
+        } else {
+          console.warn('Не удалось сохранить игры:', e);
+        }
+        return false;
       }
     }
 
@@ -1330,6 +1378,8 @@
         }
       } catch (e) {
         console.warn('Ошибка загрузки из localStorage:', e);
+        localStorage.removeItem(STORAGE_KEY);
+        alert('⚠️ Данные были повреждены. Создан новый список.');
       }
       return false;
     }
@@ -1736,7 +1786,8 @@
       closeEditModal();
     }
 
-    function addGame() {
+    // --- Добавление игры с сжатием ---
+    async function addGame() {
       const name = nameInput.value.trim();
       if (!name) {
         alert('Пожалуйста, введите название игры.');
@@ -1747,9 +1798,20 @@
       const year = yearInput.value.trim();
       const time = timeInput.value.trim();
 
+      let imageData = currentImageData || '';
+      
+      // Сжимаем картинку, если она есть
+      if (imageData && imageData.startsWith('data:image')) {
+        try {
+          imageData = await compressImage(imageData, 300, 200, 0.7);
+        } catch (e) {
+          console.warn('Не удалось сжать картинку:', e);
+        }
+      }
+
       const newGame = {
         id: Date.now(),
-        image: currentImageData || '',
+        image: imageData,
         name: name,
         description: description,
         rating: ratingSelect.value,
@@ -1760,18 +1822,25 @@
       };
 
       games.push(newGame);
-      saveGames();
+      const saved = saveGames();
       renderGames();
 
-      nameInput.value = '';
-      descriptionInput.value = '';
-      yearInput.value = '';
-      timeInput.value = '';
-      setImageData(null);
-      ratingSelect.value = '⭐⭐⭐';
-      platformSelect.value = 'PC';
-      nameInput.focus();
-      toggleForm(false);
+      if (saved) {
+        nameInput.value = '';
+        descriptionInput.value = '';
+        yearInput.value = '';
+        timeInput.value = '';
+        setImageData(null);
+        ratingSelect.value = '⭐⭐⭐';
+        platformSelect.value = 'PC';
+        nameInput.focus();
+        toggleForm(false);
+      } else {
+        // Если не сохранилось — удаляем игру из массива
+        games.pop();
+        renderGames();
+        alert('❌ Не удалось сохранить игру. Возможно, превышен лимит хранилища. Попробуйте использовать картинки меньшего размера.');
+      }
     }
 
     // --- Экспорт в PDF через печать ---
@@ -1886,6 +1955,46 @@
       saveGames();
       renderGames();
       alert('🗑️ Все игры удалены.');
+    }
+
+    function seedDemoGames() {
+      games = [
+        {
+          id: 1001,
+          image: 'https://upload.wikimedia.org/wikipedia/en/4/46/The_Last_of_Us_Part_II_cover.jpg',
+          name: 'The Last of Us Part II',
+          description: 'Эмоциональное завершение истории Элли и Эбби. Борьба за выживание, прощение и искупление.',
+          rating: '⭐⭐⭐⭐⭐',
+          platform: 'PS',
+          year: '2020',
+          time: '25 часов',
+          added: new Date().toISOString()
+        },
+        {
+          id: 1002,
+          image: '',
+          name: 'Disco Elysium',
+          description: 'Детективная RPG с уникальной механикой диалогов и внутренних голосов.',
+          rating: '⭐⭐⭐⭐',
+          platform: 'PC',
+          year: '2019',
+          time: '30 часов',
+          added: new Date().toISOString()
+        },
+        {
+          id: 1003,
+          image: '',
+          name: 'Hades',
+          description: 'Быстрая и динамичная roguelike-игра про побег из подземного мира.',
+          rating: '⭐⭐⭐⭐⭐',
+          platform: 'Nintendo',
+          year: '2021',
+          time: '15 часов 30 минут',
+          added: new Date().toISOString()
+        }
+      ];
+      saveGames();
+      renderGames();
     }
 
     function init() {
