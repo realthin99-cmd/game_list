@@ -210,6 +210,84 @@
       border-color: #e35f5f;
     }
 
+    /* ——— Фильтры по статусу ——— */
+    .status-filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      padding: 0.6rem 1rem;
+      background: #f8faff;
+      border-radius: 16px;
+      border: 1px solid #edf2f9;
+      margin-bottom: 1.2rem;
+      align-items: center;
+    }
+
+    .status-filter-bar .filter-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      color: #4b5b73;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-right: 0.2rem;
+    }
+
+    .status-filter-bar .filter-label i {
+      color: #4f7df3;
+    }
+
+    .status-filter-btn {
+      background: white;
+      border: 1px solid #dbe1ec;
+      color: #2b405c;
+      font-size: 0.75rem;
+      font-weight: 500;
+      padding: 0.3rem 0.8rem;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .status-filter-btn:hover {
+      background: #eef4ff;
+      border-color: #4f7df3;
+    }
+
+    .status-filter-btn.active {
+      background: #4f7df3;
+      border-color: #4f7df3;
+      color: white;
+    }
+
+    .status-filter-btn.active i {
+      color: white;
+    }
+
+    .status-filter-btn i {
+      font-size: 0.8rem;
+      color: #4f7df3;
+    }
+
+    .status-filter-btn .filter-count {
+      background: #edf2fa;
+      color: #4b5b73;
+      font-size: 0.6rem;
+      padding: 0.1rem 0.4rem;
+      border-radius: 20px;
+      margin-left: 2px;
+    }
+
+    .status-filter-btn.active .filter-count {
+      background: rgba(255,255,255,0.25);
+      color: white;
+    }
+
     /* ——— Форма добавления (скрываемая) ——— */
     .add-form-wrapper {
       margin-bottom: 1.5rem;
@@ -559,6 +637,8 @@
     .game-info {
       flex: 1;
       min-width: 0;
+      display: flex;
+      flex-direction: column;
     }
 
     .game-title {
@@ -642,6 +722,28 @@
       font-size: 0.7rem;
       color: #a5b6cd;
     }
+
+    /* ——— Бейдж статуса (в строке с мета-данными) ——— */
+    .game-status-badge {
+      font-size: 0.7rem;
+      font-weight: 500;
+      padding: 0.15rem 0.8rem;
+      border-radius: 20px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #edf2fa;
+      color: #2b405c;
+    }
+
+    .game-status-badge i {
+      font-size: 0.7rem;
+    }
+
+    .status-planned { background: #e8ecf1; color: #4b5b73; }
+    .status-playing { background: #dbeafe; color: #1a56db; }
+    .status-completed { background: #d1fae5; color: #065f46; }
+    .status-dropped { background: #fee2e2; color: #991b1b; }
 
     .action-btns {
       display: flex;
@@ -912,6 +1014,7 @@
       }
 
       .filter-bar,
+      .status-filter-bar,
       .sort-bar {
         display: flex !important;
       }
@@ -978,7 +1081,8 @@
         justify-content: center;
         flex-wrap: wrap;
       }
-      .filter-bar {
+      .filter-bar,
+      .status-filter-bar {
         justify-content: center;
       }
       .sort-bar {
@@ -1013,7 +1117,7 @@
 <body>
 
 <div class="app">
-  <h1><i class="fas fa-gamepad"></i> Мои пройденные игры</h1>
+  <h1><i class="fas fa-gamepad"></i> Мои игры</h1>
 
   <!-- Кнопки управления -->
   <div class="backup-controls">
@@ -1076,6 +1180,31 @@
     </button>
   </div>
 
+  <!-- Фильтры по статусу -->
+  <div class="status-filter-bar" id="statusFilterBar">
+    <span class="filter-label"><i class="fas fa-flag"></i> Статус</span>
+    <button class="status-filter-btn active" data-status="all">
+      <i class="fas fa-th-list"></i> Все
+      <span class="filter-count" id="countStatusAll">0</span>
+    </button>
+    <button class="status-filter-btn" data-status="planned">
+      <i class="fas fa-calendar-plus"></i> В планах
+      <span class="filter-count" id="countStatusPlanned">0</span>
+    </button>
+    <button class="status-filter-btn" data-status="playing">
+      <i class="fas fa-spinner"></i> В процессе
+      <span class="filter-count" id="countStatusPlaying">0</span>
+    </button>
+    <button class="status-filter-btn" data-status="completed">
+      <i class="fas fa-check-circle"></i> Пройдено
+      <span class="filter-count" id="countStatusCompleted">0</span>
+    </button>
+    <button class="status-filter-btn" data-status="dropped">
+      <i class="fas fa-times-circle"></i> Брошено
+      <span class="filter-count" id="countStatusDropped">0</span>
+    </button>
+  </div>
+
   <!-- Форма добавления (скрыта по умолчанию) -->
   <div class="add-form-wrapper">
     <div class="add-form hidden" id="addForm">
@@ -1116,6 +1245,15 @@
             <option value="⭐⭐⭐" selected>★★★☆☆ (3)</option>
             <option value="⭐⭐⭐⭐">★★★★☆ (4)</option>
             <option value="⭐⭐⭐⭐⭐">★★★★★ (5)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label><i class="fas fa-flag"></i> Статус</label>
+          <select id="gameStatus">
+            <option value="planned">В планах</option>
+            <option value="playing">В процессе</option>
+            <option value="completed" selected>Пройдено</option>
+            <option value="dropped">Брошено</option>
           </select>
         </div>
         <div class="field">
@@ -1222,6 +1360,15 @@
       </select>
     </div>
     <div class="field">
+      <label><i class="fas fa-flag"></i> Статус</label>
+      <select id="modalGameStatus">
+        <option value="planned">В планах</option>
+        <option value="playing">В процессе</option>
+        <option value="completed">Пройдено</option>
+        <option value="dropped">Брошено</option>
+      </select>
+    </div>
+    <div class="field">
       <label><i class="fas fa-desktop"></i> Платформа</label>
       <select id="modalGamePlatform">
         <option value="PC">PC</option>
@@ -1266,6 +1413,7 @@
     const nameInput = document.getElementById('gameName');
     const descriptionInput = document.getElementById('gameDescription');
     const ratingSelect = document.getElementById('gameRating');
+    const statusSelect = document.getElementById('gameStatus');
     const platformSelect = document.getElementById('gamePlatform');
     const yearInput = document.getElementById('gameYear');
     const timeInput = document.getElementById('gameTime');
@@ -1282,7 +1430,7 @@
     const sortSelect = document.getElementById('sortSelect');
     const gamesCount = document.getElementById('gamesCount');
 
-    // --- Фильтры ---
+    // --- Фильтры платформ ---
     let currentFilter = 'all';
     const filterBtns = document.querySelectorAll('.filter-btn');
     const countElements = {
@@ -1295,6 +1443,17 @@
       RPCS3: document.getElementById('countRPCS3')
     };
 
+    // --- Фильтры статуса ---
+    let currentStatusFilter = 'all';
+    const statusFilterBtns = document.querySelectorAll('.status-filter-btn');
+    const statusCountElements = {
+      all: document.getElementById('countStatusAll'),
+      planned: document.getElementById('countStatusPlanned'),
+      playing: document.getElementById('countStatusPlaying'),
+      completed: document.getElementById('countStatusCompleted'),
+      dropped: document.getElementById('countStatusDropped')
+    };
+
     // --- Фильтр по годам ---
     const filterYearFrom = document.getElementById('filterYearFrom');
     const filterYearTo = document.getElementById('filterYearTo');
@@ -1304,6 +1463,7 @@
     const modalName = document.getElementById('modalGameName');
     const modalDescription = document.getElementById('modalGameDescription');
     const modalRating = document.getElementById('modalGameRating');
+    const modalStatus = document.getElementById('modalGameStatus');
     const modalPlatform = document.getElementById('modalGamePlatform');
     const modalYear = document.getElementById('modalGameYear');
     const modalTime = document.getElementById('modalGameTime');
@@ -1404,6 +1564,7 @@
       timeInput.value = '';
       setImageData(null);
       ratingSelect.value = '⭐⭐⭐';
+      statusSelect.value = 'completed';
       platformSelect.value = 'PC';
     });
 
@@ -1446,6 +1607,10 @@
           const parsed = JSON.parse(saved);
           if (Array.isArray(parsed) && parsed.length > 0) {
             games = parsed;
+            // Для старых игр, у которых нет статуса, установим 'completed'
+            games.forEach(g => {
+              if (!g.status) g.status = 'completed';
+            });
             renderGames();
             return true;
           }
@@ -1464,6 +1629,10 @@
       // Фильтр по платформе
       if (currentFilter !== 'all') {
         filtered = filtered.filter(g => g.platform === currentFilter);
+      }
+      // Фильтр по статусу
+      if (currentStatusFilter !== 'all') {
+        filtered = filtered.filter(g => g.status === currentStatusFilter);
       }
       // Фильтр по году
       const from = filterYearFrom.value.trim();
@@ -1546,6 +1715,14 @@
           countElements[p].textContent = count;
         }
       });
+
+      const statuses = ['all', 'planned', 'playing', 'completed', 'dropped'];
+      statuses.forEach(s => {
+        const count = s === 'all' ? games.length : games.filter(g => g.status === s).length;
+        if (statusCountElements[s]) {
+          statusCountElements[s].textContent = count;
+        }
+      });
     }
 
     function setFilter(platform) {
@@ -1556,10 +1733,24 @@
       renderGames();
     }
 
+    function setStatusFilter(status) {
+      currentStatusFilter = status;
+      statusFilterBtns.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.status === status);
+      });
+      renderGames();
+    }
+
     // --- Фильтры ---
     filterBtns.forEach(btn => {
       btn.addEventListener('click', () => {
         setFilter(btn.dataset.platform);
+      });
+    });
+
+    statusFilterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        setStatusFilter(btn.dataset.status);
       });
     });
 
@@ -1713,6 +1904,16 @@
       return map[platform] || 'fa-solid fa-gamepad';
     }
 
+    function getStatusBadge(status) {
+      const map = {
+        'planned': { label: 'В планах', icon: 'fa-calendar-plus', cls: 'status-planned' },
+        'playing': { label: 'В процессе', icon: 'fa-spinner', cls: 'status-playing' },
+        'completed': { label: 'Пройдено', icon: 'fa-check-circle', cls: 'status-completed' },
+        'dropped': { label: 'Брошено', icon: 'fa-times-circle', cls: 'status-dropped' }
+      };
+      return map[status] || map['completed'];
+    }
+
     function renderGames() {
       const items = container.querySelectorAll('.game-item');
       items.forEach(el => el.remove());
@@ -1805,6 +2006,13 @@
           metaDiv.appendChild(yearSpan);
         }
 
+        // --- Бейдж статуса (в строке с мета-данными) ---
+        const statusInfo = getStatusBadge(game.status);
+        const badge = document.createElement('span');
+        badge.className = `game-status-badge ${statusInfo.cls}`;
+        badge.innerHTML = `<i class="fas ${statusInfo.icon}"></i> ${statusInfo.label}`;
+        metaDiv.appendChild(badge);
+
         infoDiv.appendChild(metaDiv);
         item.appendChild(infoDiv);
 
@@ -1850,6 +2058,7 @@
       modalName.value = game.name || '';
       modalDescription.value = game.description || '';
       modalRating.value = game.rating || '⭐⭐⭐';
+      modalStatus.value = game.status || 'completed';
       modalPlatform.value = game.platform || 'PC';
       modalYear.value = game.year || '';
       modalTime.value = game.time || '';
@@ -1883,6 +2092,7 @@
       games[idx].name = name;
       games[idx].description = modalDescription.value.trim();
       games[idx].rating = modalRating.value;
+      games[idx].status = modalStatus.value;
       games[idx].platform = modalPlatform.value;
       games[idx].year = modalYear.value.trim() || '';
       games[idx].time = modalTime.value.trim() || '';
@@ -1923,6 +2133,7 @@
         name: name,
         description: description,
         rating: ratingSelect.value,
+        status: statusSelect.value,
         platform: platformSelect.value,
         year: year,
         time: time,
@@ -1940,6 +2151,7 @@
         timeInput.value = '';
         setImageData(null);
         ratingSelect.value = '⭐⭐⭐';
+        statusSelect.value = 'completed';
         platformSelect.value = 'PC';
         nameInput.focus();
         toggleForm(false);
@@ -1958,7 +2170,7 @@
       }
 
       const originalTitle = document.title;
-      document.title = 'Мои пройденные игры';
+      document.title = 'Мои игры';
 
       document.body.classList.add('printing');
 
@@ -2029,6 +2241,8 @@
             if (!confirm) return;
           }
           games = imported;
+          // Убедимся, что у всех есть статус
+          games.forEach(g => { if (!g.status) g.status = 'completed'; });
           saveGames();
           renderGames();
           alert(`✅ Импортировано ${games.length} игр!`);
@@ -2063,6 +2277,7 @@
           name: 'The Last of Us Part II',
           description: 'Эмоциональное завершение истории Элли и Эбби. Борьба за выживание, прощение и искупление.',
           rating: '⭐⭐⭐⭐⭐',
+          status: 'completed',
           platform: 'PS',
           year: '2020',
           time: '25 часов',
@@ -2074,6 +2289,7 @@
           name: 'Disco Elysium',
           description: 'Детективная RPG с уникальной механикой диалогов и внутренних голосов.',
           rating: '⭐⭐⭐⭐',
+          status: 'completed',
           platform: 'PC',
           year: '2019',
           time: '30 часов',
@@ -2085,6 +2301,7 @@
           name: 'Hades',
           description: 'Быстрая и динамичная roguelike-игра про побег из подземного мира.',
           rating: '⭐⭐⭐⭐⭐',
+          status: 'completed',
           platform: 'Nintendo',
           year: '2021',
           time: '15 часов 30 минут',
